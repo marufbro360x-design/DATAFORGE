@@ -138,6 +138,22 @@
       100% { stroke: #A0A0A0; opacity: 1; }
     }
 
+    /* Password Type Badge */
+    .pass-type-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: all 0.3s;
+    }
+    .pass-type-badge.complex { background: rgba(0,196,204,0.15); color: #00C4CC; }
+    .pass-type-badge.name { background: rgba(0,230,118,0.15); color: #00E676; }
+    .pass-type-badge.simple { background: rgba(255,193,7,0.15); color: #FFC107; }
+    .pass-type-badge.mix { background: rgba(233,30,99,0.15); color: #E91E63; }
+
     /* Link Section */
     .link-section {
       margin: 1.5rem 0;
@@ -153,12 +169,27 @@
       margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .link-section .link-label .left {
+      display: flex;
+      align-items: center;
       gap: 8px;
     }
     .link-section .link-label svg {
       width: 16px;
       height: 16px;
       stroke: #00C4CC;
+    }
+    .link-counter {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: #00C4CC;
+      background: rgba(0,196,204,0.1);
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
     }
     .link-wrapper {
       display: flex;
@@ -173,10 +204,18 @@
       border-radius: 4px;
       padding: 0.6rem 0.8rem;
       font-family: 'Inter', monospace;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #E0E0E0;
       word-break: break-all;
       min-width: 150px;
+      transition: border 0.3s, background 0.3s;
+    }
+    .link-box.link-update {
+      animation: linkPulse 0.6s ease-out;
+    }
+    @keyframes linkPulse {
+      0% { border-color: #00C4CC; background: rgba(0,196,204,0.08); }
+      100% { border-color: #2A2A2A; background: #0C0C0C; }
     }
     .link-wrapper .link-btn {
       background: transparent;
@@ -333,6 +372,14 @@
       margin-top: 4px;
       word-break: break-all;
     }
+    .history-link {
+      font-family: monospace;
+      font-size: 0.65rem;
+      color: #00C4CC;
+      margin-top: 4px;
+      word-break: break-all;
+      opacity: 0.8;
+    }
     .history-actions {
       display: flex;
       gap: 10px;
@@ -423,14 +470,17 @@
   <!-- Link Section -->
   <div class="link-section">
     <div class="link-label">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
-      Quick Access Link
+      <div class="left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        Quick Access Link
+      </div>
+      <div class="link-counter" id="linkCounter">1 / 10</div>
     </div>
     <div class="link-wrapper">
-      <div class="link-box" id="linkDisplay">https://s.betfugu01.com/bncjykh9lynaxd4</div>
+      <div class="link-box" id="linkDisplay">https://s.betfugu01.com/wpefn1ooizzozya</div>
       <button class="link-btn" id="copyLinkBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -469,8 +519,8 @@
   <!-- Strong Password Section -->
   <div class="field-group">
     <div class="field-label">
-      <span>🔐 Strong Password (10-12 chars)</span>
-      <span style="font-size:0.7rem;">upper | lower | num | symbol</span>
+      <span>🔐 Password</span>
+      <span class="pass-type-badge complex" id="passTypeBadge">Complex</span>
     </div>
     <div class="output-wrapper">
       <input type="text" id="passwordOutput" class="output-box" readonly placeholder="••••••••••••" value="">
@@ -510,26 +560,64 @@
 
 <script>
   (function() {
-    // ---------- Link Management ----------
-    const LINK_URL = 'https://s.betfugu01.com/bncjykh9lynaxd4';
+    // ---------- Link Pool (10 links) ----------
+    const LINK_POOL = [
+      'https://s.betfugu01.com/wpefn1ooizzozya',
+      'https://s.betfugu01.com/v70zsa0ht3i8rc4',
+      'https://s.betfugu01.com/gbkcag9itddm1q_',
+      'https://s.betfugu01.com/l922rhlep7ujhbc',
+      'https://s.betfugu01.com/5kgrk_rzykuqy4m',
+      'https://s.betfugu01.com/ixlzp_ruboicuct',
+      'https://s.betfugu01.com/j8l-0fykahwk7l-',
+      'https://s.betfugu01.com/ejsnj7zwi7ae2jy',
+      'https://s.betfugu01.com/svpbzh1qjui3joc',
+      'https://s.betfugu01.com/8puqjq8uturgble'
+    ];
     
-    function setupLinkActions() {
+    let currentLinkIndex = 0;
+
+    function getRandomLink() {
+      const randomIndex = Math.floor(Math.random() * LINK_POOL.length);
+      currentLinkIndex = randomIndex;
+      return LINK_POOL[randomIndex];
+    }
+
+    function updateLinkDisplay() {
+      const newLink = getRandomLink();
       const linkDisplay = document.getElementById('linkDisplay');
+      const counterDisplay = document.getElementById('linkCounter');
+      
+      if (linkDisplay) {
+        linkDisplay.textContent = newLink;
+        linkDisplay.classList.remove('link-update');
+        void linkDisplay.offsetWidth;
+        linkDisplay.classList.add('link-update');
+      }
+      
+      if (counterDisplay) {
+        counterDisplay.textContent = (currentLinkIndex + 1) + ' / ' + LINK_POOL.length;
+      }
+      
+      return newLink;
+    }
+
+    // ---------- Link Actions ----------
+    function setupLinkActions() {
       const copyLinkBtn = document.getElementById('copyLinkBtn');
       const visitLinkBtn = document.getElementById('visitLinkBtn');
       
-      if (linkDisplay) linkDisplay.textContent = LINK_URL;
-      
       if (copyLinkBtn) {
         copyLinkBtn.addEventListener('click', async () => {
-          await copyToClipboard(LINK_URL, copyLinkBtn, 'Link copied!');
+          const currentLink = document.getElementById('linkDisplay').textContent;
+          await copyToClipboard(currentLink, copyLinkBtn, 'Link copied!');
           flashCopyElement(copyLinkBtn);
         });
       }
       
       if (visitLinkBtn) {
         visitLinkBtn.addEventListener('click', () => {
-          window.open(LINK_URL, '_blank');
+          const currentLink = document.getElementById('linkDisplay').textContent;
+          window.open(currentLink, '_blank');
           showToast('Opening link...', 1000);
         });
       }
@@ -544,14 +632,34 @@
       return prefix + suffix;
     }
 
-    // ---------- Strong Password Generator ----------
+    // ---------- Password Generator (4 Formats) ----------
     const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
     const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const NUMBERS = '0123456789';
     const SYMBOLS = '!@#$%^&*()_+[]{}<>?,.-=';
+
     function getRandomChar(str) { return str[Math.floor(Math.random() * str.length)]; }
-    function generateStrongPassword() {
-      const length = Math.floor(Math.random() * 3) + 10;
+    function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    // Common names for "name" password format
+    const NAME_POOL = [
+      'rahim', 'karim', 'hasan', 'sohel', 'nabil', 'arif', 'sabbir', 'tanvir',
+      'fahim', 'nayem', 'shakib', 'rakib', 'sumon', 'emon', 'joy', 'ratul',
+      'monir', 'jahid', 'sajib', 'anas', 'ovi', 'kabir', 'miraj', 'shanto',
+      'sadia', 'nusrat', 'tasnim', 'mim', 'raisa', 'jannat', 'sathi', 'ritu'
+    ];
+
+    // Simple words for "simple" password format
+    const WORD_POOL = [
+      'hello', 'world', 'admin', 'user', 'login', 'welcome', 'master',
+      'dragon', 'shadow', 'sunshine', 'princess', 'football', 'baseball',
+      'superman', 'batman', 'computer', 'internet', 'coffee', 'guitar',
+      'flower', 'ocean', 'mountain', 'river', 'rainbow', 'star', 'moon'
+    ];
+
+    // Format 1: Complex random (original)
+    function generateComplexPassword() {
+      const length = getRandomInt(10, 12);
       let chars = [];
       chars.push(getRandomChar(LOWERCASE), getRandomChar(UPPERCASE), getRandomChar(NUMBERS), getRandomChar(SYMBOLS));
       const allChars = LOWERCASE + UPPERCASE + NUMBERS + SYMBOLS;
@@ -561,6 +669,92 @@
         [chars[i], chars[j]] = [chars[j], chars[i]];
       }
       return chars.join('');
+    }
+
+    // Format 2: Name + @ + 123 (e.g., Rahim@123, karim@123)
+    function generateNamePassword() {
+      const name = NAME_POOL[Math.floor(Math.random() * NAME_POOL.length)];
+      // Randomly capitalize first letter or all lowercase
+      const styledName = Math.random() > 0.5 
+        ? name.charAt(0).toUpperCase() + name.slice(1) 
+        : name;
+      const num = getRandomInt(100, 999); // 3-digit number
+      return styledName + '@' + num;
+    }
+
+    // Format 3: Simple word + @ + Capital + 123 (e.g., hello@A123, ocean@K123)
+    function generateSimplePassword() {
+      const word = WORD_POOL[Math.floor(Math.random() * WORD_POOL.length)];
+      const capital = getRandomChar(UPPERCASE);
+      const num = getRandomInt(100, 999);
+      return word + '@' + capital + num;
+    }
+
+    // Format 4: Mix - Random word part + @ + Capital + 123
+    function generateMixPassword() {
+      // Random combination: could be lowercase + digits, or lowercase + uppercase
+      let base = '';
+      const baseType = Math.random();
+      
+      if (baseType < 0.4) {
+        // only lowercase letters (random length 4-6)
+        const len = getRandomInt(4, 6);
+        for (let i = 0; i < len; i++) base += getRandomChar(LOWERCASE);
+      } else if (baseType < 0.7) {
+        // lowercase + digits
+        const len = getRandomInt(3, 5);
+        for (let i = 0; i < len; i++) base += getRandomChar(LOWERCASE);
+        base += getRandomInt(10, 99);
+      } else {
+        // mixed case
+        const len = getRandomInt(3, 5);
+        for (let i = 0; i < len; i++) {
+          base += Math.random() > 0.5 ? getRandomChar(LOWERCASE) : getRandomChar(UPPERCASE);
+        }
+      }
+      
+      const capital = getRandomChar(UPPERCASE);
+      const num = getRandomInt(100, 999);
+      return base + '@' + capital + num;
+    }
+
+    // Main password generator - randomly picks one of 4 formats
+    function generatePassword() {
+      const r = Math.random();
+      // Weights: complex 25%, name 30%, simple 25%, mix 20%
+      let password, type;
+      
+      if (r < 0.25) {
+        password = generateComplexPassword();
+        type = 'complex';
+      } else if (r < 0.55) {
+        password = generateNamePassword();
+        type = 'name';
+      } else if (r < 0.80) {
+        password = generateSimplePassword();
+        type = 'simple';
+      } else {
+        password = generateMixPassword();
+        type = 'mix';
+      }
+      
+      return { password, type };
+    }
+
+    // Update password type badge
+    function updatePassTypeBadge(type) {
+      const badge = document.getElementById('passTypeBadge');
+      if (!badge) return;
+      
+      const typeLabels = {
+        complex: 'Complex',
+        name: 'Name+@+123',
+        simple: 'Simple',
+        mix: 'Mix'
+      };
+      
+      badge.textContent = typeLabels[type] || 'Password';
+      badge.className = 'pass-type-badge ' + type;
     }
 
     // ----- Persistent History -----
@@ -583,11 +777,13 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(historyEntries.slice(0, 30)));
     }
 
-    function addToHistory(phone, password) {
+    function addToHistory(phone, password, link, passType) {
       if (!phone || !password) return;
       const newEntry = {
         phone: phone,
         password: password,
+        link: link || '',
+        passType: passType || 'complex',
         timestamp: Date.now(),
         id: Date.now() + '-' + Math.random().toString(36).substr(2, 6)
       };
@@ -617,10 +813,12 @@
         itemDiv.className = 'history-item';
         const date = new Date(entry.timestamp);
         const timeStr = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+        const linkHtml = entry.link ? `<div class="history-link">🔗 ${escapeHtml(entry.link)}</div>` : '';
         itemDiv.innerHTML = `
           <div class="history-data">
             <div class="history-phone">📱 ${escapeHtml(entry.phone)}</div>
             <div class="history-pass">🔑 ${escapeHtml(entry.password)}</div>
+            ${linkHtml}
             <div style="font-size:0.65rem; color:#666; margin-top:4px;">${timeStr}</div>
           </div>
           <div class="history-actions">
@@ -630,7 +828,7 @@
             <button class="history-copy-btn" data-type="password" data-value="${escapeHtml(entry.password)}" data-id="${entry.id}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Pass
             </button>
-            <button class="history-use-btn" data-phone="${escapeHtml(entry.phone)}" data-pass="${escapeHtml(entry.password)}" data-id="${entry.id}">
+            <button class="history-use-btn" data-phone="${escapeHtml(entry.phone)}" data-pass="${escapeHtml(entry.password)}" data-link="${escapeHtml(entry.link || '')}" data-id="${entry.id}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12H4M12 4v16"/></svg> Use
             </button>
           </div>
@@ -656,9 +854,22 @@
           e.stopPropagation();
           const phoneVal = btn.getAttribute('data-phone');
           const passVal = btn.getAttribute('data-pass');
+          const linkVal = btn.getAttribute('data-link');
           if (phoneVal && passVal) {
             document.getElementById('phoneOutput').value = phoneVal;
             document.getElementById('passwordOutput').value = passVal;
+            if (linkVal) {
+              const linkDisplay = document.getElementById('linkDisplay');
+              linkDisplay.textContent = linkVal;
+              linkDisplay.classList.remove('link-update');
+              void linkDisplay.offsetWidth;
+              linkDisplay.classList.add('link-update');
+              const idx = LINK_POOL.indexOf(linkVal);
+              const counterDisplay = document.getElementById('linkCounter');
+              if (counterDisplay && idx !== -1) {
+                counterDisplay.textContent = (idx + 1) + ' / ' + LINK_POOL.length;
+              }
+            }
             showToast('Loaded to main fields', 1200);
             const phoneInp = document.getElementById('phoneOutput');
             phoneInp.style.backgroundColor = '#202020';
@@ -717,11 +928,18 @@
     // ----- Generate new data -----
     function generateAndStore() {
       const newPhone = generateBangladeshPhone();
-      const newPassword = generateStrongPassword();
+      const passResult = generatePassword();
+      const newPassword = passResult.password;
+      const passType = passResult.type;
+      const newLink = updateLinkDisplay();
+      
       const phoneInput = document.getElementById('phoneOutput');
       const passInput = document.getElementById('passwordOutput');
       phoneInput.value = newPhone;
       passInput.value = newPassword;
+      
+      updatePassTypeBadge(passType);
+      
       phoneInput.style.transition = 'background 0.1s';
       passInput.style.transition = 'background 0.1s';
       phoneInput.style.backgroundColor = '#191919';
@@ -730,8 +948,9 @@
         phoneInput.style.backgroundColor = '';
         passInput.style.backgroundColor = '';
       }, 150);
-      addToHistory(newPhone, newPassword);
-      showToast('New credentials generated', 1200);
+      
+      addToHistory(newPhone, newPassword, newLink, passType);
+      showToast('New data generated', 1300);
     }
 
     function setupMainCopy() {
@@ -766,6 +985,10 @@
       document.getElementById('passwordOutput').value = '';
       document.getElementById('phoneOutput').placeholder = '1XXXXXXXXX';
       document.getElementById('passwordOutput').placeholder = '••••••••••••';
+      const initialLink = getRandomLink();
+      document.getElementById('linkDisplay').textContent = initialLink;
+      document.getElementById('linkCounter').textContent = (currentLinkIndex + 1) + ' / ' + LINK_POOL.length;
+      updatePassTypeBadge('complex');
     }
 
     init();
